@@ -1,0 +1,105 @@
+name: Deploy Test Store
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - release
+    paths:
+      - 'apps/shopify-test/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch: # 允许手动触发
+
+# 防止同时部署多个版本
+concurrency:
+  group: deploy-test
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  deployments: write
+
+jobs:
+  deploy:
+    name: Deploy to Shopify Oxygen (Test)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build app
+        run: pnpm -C apps/shopify-test run build
+
+      - name: Determine deployment environment
+        id: env
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "ENV_NAME=production" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/release" ]]; then
+            echo "ENV_NAME=uat" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            echo "ENV_NAME=dev" >> $GITHUB_OUTPUT
+          else
+            echo "ENV_NAME=preview" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy to Oxygen
+        env:
+          OXYGEN_DEPLOYMENT_TOKEN: ${{ secrets.OXYGEN_DEPLOYMENT_TOKEN_TEST }}
+          DEPLOYMENT_ENV: ${{ steps.env.outputs.ENV_NAME }}
+        run: |
+          cd apps/shopify-test
+          echo "🚀 Deploying to environment: $DEPLOYMENT_ENV"
+          echo "🌿 Current branch: ${{ github.ref_name }}"
+          echo "📋 Git ref: ${{ github.ref }}"
+          echo "📦 Shopify CLI version:"
+          pnpm exec shopify version
+          pnpm build:deps
+          echo "🔥 Starting deployment..."
+          pnpm exec shopify hydrogen deploy --force --no-lockfile-check --token "$OXYGEN_DEPLOYMENT_TOKEN"
+
+      - name: Notify deployment success
+        if: success()
+        env:
+          DEPLOYMENT_ENV: ${{ steps.env.outputs.ENV_NAME }}
+        run: |
+          echo "✅ Test store deployed successfully!"
+          echo "🚀 Deployment completed to Oxygen"
+          echo "📦 Environment: $DEPLOYMENT_ENV"
+          echo "🌐 Branch: ${{ github.ref_name }}"
+
+      - name: Notify deployment failure
+        if: failure()
+        run: |
+          echo "❌ Test store deployment failed!"
+          exit 1

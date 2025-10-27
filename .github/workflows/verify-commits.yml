@@ -1,0 +1,38 @@
+name: Verify Commit Messages
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+      - release
+
+jobs:
+  commitlint:
+    name: Verify Commit Messages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 获取所有历史记录以检查所有 commits
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify commit messages
+        run: |
+          # 检查 PR 中的所有 commit 消息
+          pnpm commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose

@@ -1,0 +1,35 @@
+{
+  "name": "shopify-australia",
+  "private": true,
+  "sideEffects": false,
+  "version": "2025.7.0",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm build:deps && shopify hydrogen build --no-lockfile-check",
+    "build:deps": "pnpm --filter \"@repo/*\" build",
+    "deploy": "pnpm build:deps && shopify hydrogen deploy --force --no-lockfile-check --token \"$OXYGEN_DEPLOYMENT_TOKEN\"",
+    "dev": "shopify hydrogen dev --port 3000",
+    "preview": "pnpm build:deps && shopify hydrogen preview --build",
+    "lint": "eslint --no-error-on-unmatched-pattern --cache --cache-location .eslintcache .",
+    "typecheck": "react-router typegen && tsc --noEmit",
+    "codegen": "shopify hydrogen codegen && react-router typegen"
+  },
+  "prettier": "@shopify/prettier-config",
+  "dependencies": {
+    "@repo/components": "workspace:*",
+    "@repo/graphql": "workspace:*",
+    "@repo/i18n": "workspace:*",
+    "@repo/lib": "workspace:*",
+    "@shopify/hydrogen": "2025.7.0",
+    "@shopify/shopify-api": "^12.0.0"
+  },
+  "devDependencies": {
+    "vite": "^6.2.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "browserslist": [
+    "defaults"
+  ]
+}

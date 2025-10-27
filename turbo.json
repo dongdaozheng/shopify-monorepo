@@ -1,0 +1,46 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "globalEnv": ["NODE_ENV"],
+  "globalDependencies": [".env*"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "build/**", ".react-router/**"],
+      "env": ["NODE_ENV"],
+      "inputs": [
+        "src/**",
+        "app/**",
+        "package.json",
+        "tsconfig.json",
+        "tsup.config.ts",
+        "vite.config.ts",
+        "react-router.config.ts"
+      ]
+    },
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["^build"],
+      "outputs": [".eslintcache"],
+      "cache": true
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "outputs": ["*.tsbuildinfo"],
+      "cache": true
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"],
+      "cache": true
+    },
+    "deploy": {
+      "dependsOn": ["^build", "build"],
+      "cache": false
+    }
+  }
+}

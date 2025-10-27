@@ -1,0 +1,35 @@
+name: Cache Cleanup
+
+# 定期清理旧的缓存，释放存储空间
+on:
+  schedule:
+    # 每周日凌晨 2 点运行
+    - cron: '0 2 * * 0'
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  cleanup:
+    name: Clean Old Caches
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cleanup old caches
+        run: |
+          echo "🧹 Cleaning up old GitHub Actions caches..."
+
+          # 获取所有缓存
+          gh extension install actions/gh-actions-cache
+
+          # 列出缓存
+          gh actions-cache list
+
+          # 删除 7 天前的缓存
+          gh actions-cache delete --all --older-than 7d || true
+
+          echo "✅ Cache cleanup completed!"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

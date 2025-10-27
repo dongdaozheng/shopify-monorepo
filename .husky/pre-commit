@@ -1,0 +1,2 @@
+# 运行 lint-staged 检查暂存的文件
+pnpm lint-staged

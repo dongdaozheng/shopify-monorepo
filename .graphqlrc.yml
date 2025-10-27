@@ -1,0 +1,11 @@
+projects:
+  storefront:
+    schema: 'packages/graphql/types/storefront/storefront-2025-07.schema.json'
+    documents:
+      - 'packages/graphql/src/storefront/**/*.graphql'
+      - 'packages/graphql/src/storefront/**/*.{ts,tsx,js,jsx}'
+  admin:
+    schema: 'packages/graphql/types/admin/admin-2025-07.schema.json'
+    documents:
+      - 'packages/graphql/src/admin/**/*.graphql'
+      - 'packages/graphql/src/admin/**/*.{ts,tsx,js,jsx}'

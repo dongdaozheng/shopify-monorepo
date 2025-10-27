@@ -1,0 +1,46 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build Outputs
+.next/
+out/
+build
+dist
+.turbo
+.vercel
+.react-router/
+
+# TypeScript Build Info
+*.tsbuildinfo
+.tsbuildinfo
+
+# Generated Files
+packages/graphql/types
+pnpm-lock.yaml
+*.min.js
+*.min.css
+
+# Environment Files
+.env
+.env.*
+
+# Cache
+.eslintcache
+coverage
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# Misc
+*.pem
+dump.rdb
+react-country.json
+country.js
+packages/env/src/country/others
+*.template
+
